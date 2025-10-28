@@ -1,7 +1,6 @@
 ﻿namespace FiniteStateMachine;
 
-public record Rule<TState, TTrigger> 
-    where TState : Enum 
+public sealed record Rule<TState, TTrigger> 
     where TTrigger : Enum
 {
     public required TState From { get; init; }

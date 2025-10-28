@@ -1,0 +1,50 @@
+name: Main Pipeline
+
+on:
+  push: 
+    branches:
+      - main
+
+jobs: 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0'
+          
+      - name: Restore dependencies
+        run: dotnet restore
+          
+      - name: Run test
+        run: dotnet test --no-restore --verbosity normal 
+  
+  publish:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+  
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0'
+
+      - name: Set up NuGet environment
+          env:
+            NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          run: |
+            echo "::add-mask::$NUGET_API_KEY"
+
+#      - name: Deploy to NuGet
+#        run: dotnet nuget push <package-name.nupkg> --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+#        
+#      - name: Cleanup built artifacts
+#          run: dotnet clean  
+      
+    

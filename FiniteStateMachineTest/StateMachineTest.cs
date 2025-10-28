@@ -10,34 +10,38 @@ public class StateMachineTest
         var stateMachine = BuildStateMachine();
         var stateMachineCurrentState = stateMachine.CurrentState;
         Assert.Equal(9, stateMachine.Rules.Count);
-        Assert.Equal(State.Paused, stateMachineCurrentState);
+        Assert.Equal(EnumState.Paused, stateMachineCurrentState);
     }
-
-
+    
     [Fact]
     public void ShouldTransitionToNextState()
     {
         var stateMachine = BuildStateMachine();
         var result = stateMachine.Trigger(Trigger.Play);
         Assert.True(result);
-        Assert.Equal(State.Playing, stateMachine.CurrentState);
+        Assert.Equal(EnumState.Playing, stateMachine.CurrentState);
         
     }
     
-    private static StateMachine<State, Trigger> BuildStateMachine()
+    private static StateMachine<EnumState, Trigger> BuildStateMachine()
     {
-        return StateMachine<State, Trigger>.Builder
-            .Create()
-            .HasInitialState(State.Paused)
-            .AddTransition(RuleBuilder<State, Trigger>.Builder().InState(State.Paused).OnTrigger(Trigger.Play).TransitionTo(State.Playing).Build())
-            .AddTransition(RuleBuilder<State, Trigger>.Builder().InState(State.Paused).OnTrigger(Trigger.Pause).TransitionTo(State.Paused).Build())
-            .AddTransition(RuleBuilder<State, Trigger>.Builder().InState(State.Paused).OnTrigger(Trigger.Stop).TransitionTo(State.Stopped).Build())
-            .AddTransition(RuleBuilder<State, Trigger>.Builder().InState(State.Stopped).OnTrigger(Trigger.Play).TransitionTo(State.Playing).Build())
-            .AddTransition(RuleBuilder<State, Trigger>.Builder().InState(State.Stopped).OnTrigger(Trigger.Pause).TransitionTo(State.Stopped).Build())
-            .AddTransition(RuleBuilder<State, Trigger>.Builder().InState(State.Stopped).OnTrigger(Trigger.Stop).TransitionTo(State.Stopped).Build())
-            .AddTransition(RuleBuilder<State, Trigger>.Builder().InState(State.Playing).OnTrigger(Trigger.Play).TransitionTo(State.Playing).Build())
-            .AddTransition(RuleBuilder<State, Trigger>.Builder().InState(State.Playing).OnTrigger(Trigger.Pause).TransitionTo(State.Paused).Build())
-            .AddTransition(RuleBuilder<State, Trigger>.Builder().InState(State.Playing).OnTrigger(Trigger.Stop).TransitionTo(State.Stopped).Build())
+         return StateMachine<EnumState, Trigger>
+            .WithInitialState(EnumState.Paused)
+            .State(EnumState.Paused, cfg => cfg
+                .On(Trigger.Play).GoTo(EnumState.Playing)
+                .On(Trigger.Pause).GoTo(EnumState.Paused)
+                .On(Trigger.Stop).GoTo(EnumState.Stopped)
+            )
+            .State(EnumState.Stopped, cfg => cfg
+                .On(Trigger.Play).GoTo(EnumState.Playing)
+                .On(Trigger.Pause).GoTo(EnumState.Stopped)
+                .On(Trigger.Stop).GoTo(EnumState.Stopped)  
+            )
+            .State(EnumState.Playing, cfg => cfg
+                .On(Trigger.Play).GoTo(EnumState.Playing)
+                .On(Trigger.Pause).GoTo(EnumState.Paused)
+                .On(Trigger.Stop).GoTo(EnumState.Stopped)  
+            )
             .Build();
     }
 }
