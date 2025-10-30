@@ -35,16 +35,19 @@ jobs:
         with:
           dotnet-version: '9.0'
 
-      - name: Set up NuGet environment
-          env:
-            NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-          run: |
-            echo "::add-mask::$NUGET_API_KEY"
+      - name: Pack the project
+        run: dotnet pack --configuration Release --output ./artifacts
 
-#      - name: Deploy to NuGet
-#        run: dotnet nuget push <package-name.nupkg> --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
-#        
-#      - name: Cleanup built artifacts
-#          run: dotnet clean  
+      - name: Set up NuGet environment
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          echo "::add-mask::$NUGET_API_KEY"
+
+      - name: Deploy to NuGet
+        run: dotnet nuget push ./artifacts/StateCore.nupkg --api-key $NUGET_API_KEY --source "https://api.nuget.org/v3/index.json"
+
+      - name: Cleanup built artifacts
+        run: dotnet clean  
       
     
